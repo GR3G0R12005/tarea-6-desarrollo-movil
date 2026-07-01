@@ -138,7 +138,7 @@ class _PokemonScreenState extends State<PokemonScreen> {
               Image.network(
                 img.toString(),
                 height: 200,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     const Icon(Icons.catching_pokemon, size: 120),
               )
             else

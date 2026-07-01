@@ -114,7 +114,7 @@ class _UniversitiesScreenState extends State<UniversitiesScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _universities!.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final uni = _universities![index] as Map<String, dynamic>;
         final name = uni['name'] ?? 'Sin nombre';

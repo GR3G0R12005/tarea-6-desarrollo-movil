@@ -35,19 +35,27 @@ class _WordpressScreenState extends State<WordpressScreen> {
     }
   }
 
-  /// Quita etiquetas HTML y decodifica entidades basicas.
+  /// Entidades HTML mas comunes (acentos en espanol, comillas, etc.).
+  static const Map<String, String> _entities = {
+    '&#8217;': "'", '&#8216;': "'", '&#8220;': '"', '&#8221;': '"',
+    '&#8230;': '...', '&hellip;': '...', '&nbsp;': ' ', '&amp;': '&',
+    '&quot;': '"', '&#039;': "'", '&#39;': "'", '&laquo;': '«', '&raquo;': '»',
+    '&aacute;': 'á', '&eacute;': 'é', '&iacute;': 'í', '&oacute;': 'ó',
+    '&uacute;': 'ú', '&Aacute;': 'Á', '&Eacute;': 'É', '&Iacute;': 'Í',
+    '&Oacute;': 'Ó', '&Uacute;': 'Ú', '&ntilde;': 'ñ', '&Ntilde;': 'Ñ',
+    '&uuml;': 'ü', '&Uuml;': 'Ü', '&iexcl;': '¡', '&iquest;': '¿',
+    '&ordf;': 'ª', '&ordm;': 'º', '&deg;': '°',
+  };
+
+  /// Quita etiquetas HTML y decodifica entidades.
   String _clean(String html) {
     var text = html.replaceAll(RegExp(r'<[^>]*>'), '');
-    text = text
-        .replaceAll('&#8217;', "'")
-        .replaceAll('&#8220;', '"')
-        .replaceAll('&#8221;', '"')
-        .replaceAll('&#8230;', '...')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&hellip;', '...')
-        .replaceAll('&laquo;', '«')
-        .replaceAll('&raquo;', '»');
+    _entities.forEach((k, v) => text = text.replaceAll(k, v));
+    // Entidades numericas restantes (&#123;).
+    text = text.replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
+      final code = int.tryParse(m.group(1)!);
+      return code != null ? String.fromCharCode(code) : m.group(0)!;
+    });
     return text.trim();
   }
 
@@ -125,7 +133,7 @@ class _WordpressScreenState extends State<WordpressScreen> {
         Image.network(
           'https://s.w.org/style/images/about/WordPress-logotype-standard.png',
           height: 60,
-          errorBuilder: (_, __, ___) =>
+          errorBuilder: (_, _, _) =>
               const Icon(Icons.wordpress, size: 60, color: Color(0xFF21759B)),
         ),
         const SizedBox(height: 8),
@@ -165,7 +173,7 @@ class _WordpressScreenState extends State<WordpressScreen> {
               height: 160,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
             ),
           Padding(
             padding: const EdgeInsets.all(16),
