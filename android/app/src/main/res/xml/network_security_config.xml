@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Permite HTTP (cleartext) solo para la API de respaldo de universidades,
+         que no ofrece HTTPS funcional. Todo lo demas sigue exigiendo HTTPS. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">universities.hipolabs.com</domain>
+    </domain-config>
+</network-security-config>

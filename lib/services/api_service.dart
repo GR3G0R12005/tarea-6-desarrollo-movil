@@ -25,9 +25,31 @@ class ApiService {
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
-  /// Universidades de un pais -> https://adamix.net/proxy.php?country=Dominican+Republic
+  /// Universidades de un pais.
+  /// Principal -> https://adamix.net/proxy.php?country=Dominican+Republic
+  /// Respaldo  -> http://universities.hipolabs.com/search?country=... (la
+  /// misma fuente que adamix reenvia), por si el proxy esta caido (ej. 523).
   static Future<List<dynamic>> getUniversities(String country) async {
-    final url = Uri.parse('https://adamix.net/proxy.php?country=${Uri.encodeComponent(country)}');
+    final encoded = Uri.encodeComponent(country);
+    final principal = Uri.parse('https://adamix.net/proxy.php?country=$encoded');
+    final respaldo = Uri.parse('http://universities.hipolabs.com/search?country=$encoded');
+
+    try {
+      final res = await http.get(principal).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final decoded = jsonDecode(res.body);
+        if (decoded is List) return decoded;
+        return const [];
+      }
+      // El proxy respondio pero con error (523, 5xx, etc.): usamos el respaldo.
+      return await _getUniversitiesFallback(respaldo);
+    } catch (_) {
+      // Fallo de red/timeout con el proxy: intentamos el respaldo.
+      return await _getUniversitiesFallback(respaldo);
+    }
+  }
+
+  static Future<List<dynamic>> _getUniversitiesFallback(Uri url) async {
     final res = await http.get(url).timeout(_timeout);
     if (res.statusCode != 200) {
       throw Exception('Error ${res.statusCode} al consultar universidades');
